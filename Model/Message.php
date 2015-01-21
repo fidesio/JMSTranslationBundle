@@ -219,8 +219,13 @@ class Message
      */
     public function mergeExisting(Message $message)
     {
-        if ($this->id !== $message->getId()) {
-            throw new RuntimeException(sprintf('You can only merge messages with the same id. Expected id "%s", but got "%s".', $this->id, $message->getId()));
+        // Fix - When source file is a xliff the id is always a string, if the merge message come from a Yaml file PHP try to cast the array key (id) as int when parsing
+        $id = $message->getId();
+        if (is_string($this->id) && is_int($id)) {
+            $id = (string) $id;
+        }
+        if ($this->id !== $id) {
+            throw new RuntimeException(sprintf('You can only merge messages with the same id. Expected id (%s) "%s", but got (%s) "%s".', gettype($this->id), $this->id, gettype($message->getId()), $message->getId()));
         }
 
         if (null !== $meaning = $message->getMeaning()) {
